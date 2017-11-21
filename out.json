@@ -1,0 +1,12 @@
+{
+    "places": {
+        "place": {
+            "city": [
+                "Brescia",
+                "milano"
+            ],
+            "placeId": "place01",
+            "placePoint": 5
+        }
+    }
+}
