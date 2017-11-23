@@ -27,27 +27,6 @@ public class Main {
     // ----------------------------------------------------------------------------------------------------
     public static void main(String[] args) throws IOException, DocumentException {
 
-        Command addCommand = new Command("add");
-        addCommand.getOptions().add(new Option(false, "-n", "--node", 1));
-        addCommand.getOptions().add(new Option(false, "-a", "--attribute", 1));
-        addCommand.getOptions().add(new Option(false, "-t", "--text", 1));
-        addCommand.getOptions().add(new Option(false, "-r", "--root", 1));
-
-        Command changeNodeCommand = new Command("cn");
-        changeNodeCommand.getOptions().add(new Option(false, "-u", "--up", 0));
-        changeNodeCommand.getOptions().add(new Option(false, "-d", "--down", 0));
-        changeNodeCommand.getOptions().add(new Option(false, "-c", "--child", 0));
-        changeNodeCommand.getOptions().add(new Option(false, "-p", "--parent", 0));
-
-        Command printCommand = new Command("print");
-        printCommand.getOptions().add(new Option(false, "", "--xml", 0));
-
-        Command writeCommand = new Command("write");
-        writeCommand.getOptions().add(new Option(false, "-o", "--outDir", 1));
-
-        Command clearCommand = new Command("clear");
-        Command exitCommand = new Command("exit");
-
         DomBuilder domBuilder = new DomBuilder();
 
         while (true) {
