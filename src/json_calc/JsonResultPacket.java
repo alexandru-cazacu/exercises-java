@@ -6,7 +6,7 @@ package json_calc;
  */
 public class JsonResultPacket {
 
-    double result;
+    public double result;
 
     public JsonResultPacket(double result) {
         this.result = result;

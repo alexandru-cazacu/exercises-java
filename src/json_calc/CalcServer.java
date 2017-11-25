@@ -20,84 +20,91 @@ public class CalcServer {
 
     public static void main(String[] args) {
         CalcServer server = new CalcServer();
-        server.run();
+        server.Start();
     }
 
-    ServerSocket serverSocket;
-    Socket clientSocket;
+    private ServerSocket serverSocket;
 
     public CalcServer() {
 
         try {
-            this.serverSocket = new ServerSocket(19999);
-        } catch (IOException ex) {
+            this.serverSocket = new ServerSocket(3000);
+        }
+        catch (IOException ex) {
             Logger.getLogger(CalcServer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        System.out.println("Server ready on port: " + serverSocket.getLocalPort());
     }
 
     // ----------------------------------------------------------------------------------------------------
-    public void run() {
+    /**
+     * Receives and processes requests.
+     */
+    public void Start() {
         while (true) {
-            Socket clientSocket = null;
+            System.out.println("Server waiting for a request...");
             try {
-                clientSocket = this.serverSocket.accept();
-
+                // Blocks.
+                Socket clientSocket = this.serverSocket.accept();
                 processClientRequest(clientSocket);
-            } catch (Exception e) {
-                System.err.println("Error during server execution: " + e);
+            }
+            catch (IOException ex) {
+                Logger.getLogger(CalcServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
     // ----------------------------------------------------------------------------------------------------
+    /**
+     * Processes the client request and send the result on the same socket.
+     *
+     * @param clientSocket Client socket to use as i/o
+     * @throws IOException
+     */
     private void processClientRequest(Socket clientSocket) throws IOException {
-        Gson g = new Gson();
-        BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        long startRequestTime = System.currentTimeMillis();
 
-        OutputStream output = clientSocket.getOutputStream();
-        long time = System.currentTimeMillis();
+        Gson gson = new Gson();
 
-        String inputLine = null;
-//        while (null != (inputLine = in.readLine())) {
-//            System.out.println(inputLine);
-//        }
+        // Input / output buffers from client.
+        BufferedReader inBuffer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        OutputStream outBuffer = clientSocket.getOutputStream();
 
-        while (inputLine == null) {
-            inputLine = in.readLine();
-            System.out.println("inputLine: " + inputLine);
+        // No need to use a cycle since we know for a fact that a request
+        // will always have 1 line.
+        String inputLine = inBuffer.readLine();
+        // Creates a class from the json.
+        JsonPacket jsonInputPacket = gson.fromJson(inputLine, JsonPacket.class);
+
+        // Calculates result.
+        double result = 0;
+        switch (jsonInputPacket.op) {
+            case "+":
+                result = jsonInputPacket.a + jsonInputPacket.b;
+                break;
+            case "-":
+                result = jsonInputPacket.a - jsonInputPacket.b;
+                break;
+            case "*":
+                result = jsonInputPacket.a * jsonInputPacket.b;
+                break;
+            case "/":
+                result = jsonInputPacket.a / jsonInputPacket.b;
+                break;
+            default:
+                break;
         }
 
-        JsonPacket packet = g.fromJson(inputLine, JsonPacket.class);
-        // output.write(responseDocument);
+        // Sends result to client.
+        PrintWriter printWriter = new PrintWriter(outBuffer, true);
+        printWriter.println(gson.toJson(new JsonResultPacket(result)));
 
-        output.close();
-        in.close();
-        System.out.println("Request processed: " + time);
+        inBuffer.close();
+        outBuffer.close();
+        printWriter.close();
 
-        if (packet.op.equals("+")) {
-            System.out.println("Sum: " + (packet.a + packet.b));
-        }
-
-        JsonPacket packt = new JsonPacket(a, b, op);
-        System.out.println(g.toJson(packt));
-
-        InetAddress inetAddress;
-        try {
-            inetAddress = InetAddress.getByName("127.0.0.1");
-
-            socket = new Socket(inetAddress, 19999);
-
-            System.out.println("InetAddress: " + inetAddress);
-
-            PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
-
-            printWriter.println(g.toJson(packt));
-            printWriter.close();
-
-        } catch (IOException ex) {
-            Logger.getLogger(CalcClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        System.out.println("Request processed in " + (System.currentTimeMillis() - startRequestTime) / 1000.0f + "s");
+        System.out.println("Processed result was: " + result);
     }
-
 }
