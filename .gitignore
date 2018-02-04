@@ -1,1 +1,9 @@
 /build/
+/easyconfig/nbproject/private/
+/easyconfig/easyconfig/nbproject/private/
+/json_calc/nbproject/private/
+/easyconfig/json_calc/nbproject/private/
+/ping_pong_udp/nbproject/private/
+/tcp_client/nbproject/private/
+/tftp_client/nbproject/private/
+/xml_json_with_dom4j/nbproject/private/
